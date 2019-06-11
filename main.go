@@ -152,7 +152,7 @@ func parseTemplate(template string, fs *ast.File, w *bufio.Writer) error {
 			if b.Tok != token.TYPE {
 				break
 			}
-			objname = strings.Title(b.Specs[0].(*ast.TypeSpec).Name.Name)
+			objname = b.Specs[0].(*ast.TypeSpec).Name.Name
 		}
 		return true
 	})
@@ -218,7 +218,7 @@ func copyStructFile(fs *ast.File, w *bufio.Writer) {
 			if b.Tok != token.TYPE {
 				break
 			}
-			_, err := fmt.Fprintf(w, "\ntype %s struct {\n", strings.Title(b.Specs[0].(*ast.TypeSpec).Name.Name))
+			_, err := fmt.Fprintf(w, "\ntype %s struct {\n", b.Specs[0].(*ast.TypeSpec).Name.Name)
 			if err != nil {
 				log.Fatalf("Failed to write struct : %v", err)
 			}
