@@ -1,0 +1,11 @@
+package test
+
+type volumeRollback struct {
+	shouldDestroy bool // destroy any more recent snapshots and bookmarks, as well as any clones of those snapshots. check diff b/w -R and -r
+
+	forceunmount bool //forceunmount the file-system
+
+	shouldDestroySnap bool // Destroy any snapshots and bookmarks more recent than the one specified.
+
+	snapshot string // snapshot name
+}
