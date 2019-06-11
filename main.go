@@ -13,7 +13,7 @@ import (
 	"strings"
 )
 
-var builder = []string{BuildTemplate, BuildVarTemplate}
+var builder = []string{BuildTemplate, BuildVarTemplate, ValidateTemplate, BuildFuncTemplate}
 var predicate = []string{PredicateTemplate, PredicateVarTemplate}
 var utils = []string{SetVarTemplate, GetVarTemplate}
 
@@ -138,7 +138,7 @@ func parseTemplate(template string, fs *ast.File, w *bufio.Writer) error {
 	shouldParseVar := true
 	predicateGenertor := false
 
-	if template == BuildTemplate || template == PredicateTemplate {
+	if template == BuildTemplate || template == PredicateTemplate || template == BuildFuncTemplate || template == ValidateTemplate {
 		shouldParseVar = false
 	}
 	if template == PredicateVarTemplate {
@@ -210,6 +210,11 @@ func parseTemplate(template string, fs *ast.File, w *bufio.Writer) error {
 }
 
 func copyStructFile(fs *ast.File, w *bufio.Writer) {
+	// import error package
+	_, err := fmt.Fprintf(w, "\nimport \"github.com/pkg/errors\"\n")
+	if err != nil {
+		log.Fatalf("Failed to write struct : %v", err)
+	}
 
 	// fs is a parsed, type-checked *ast.File.
 	ast.Inspect(fs, func(n ast.Node) bool {
@@ -243,7 +248,12 @@ func copyStructFile(fs *ast.File, w *bufio.Writer) {
 		return true
 	})
 
-	_, err := fmt.Fprintf(w, "}\n")
+	// Add predicatelist variable
+	if _, err := w.WriteString(BuilderFieldTemplate); err != nil {
+		log.Fatalf("Failed to add predicate and error filed : %v", err)
+	}
+
+	_, err = fmt.Fprintf(w, "}\n")
 	if err != nil {
 		log.Fatalf("Failed to write struct : %v", err)
 	}
