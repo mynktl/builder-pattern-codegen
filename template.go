@@ -4,7 +4,7 @@ var BuildVarTemplate = `
 // With$Var method fills the $Var field of $NewObj object.
 func ($obj *$newobj) With$Var($var $iType) *$NewObj {
 	$obj.$var = $var
-    return $obj
+	return $obj
 }
 `
 var BuildTemplate = `
@@ -31,11 +31,10 @@ var PredicateVarTemplate = `
 func Is$VarSet() PredicateFunc {
 	return func(c *$newobj) bool {
 		return $cond
-    }
+	}
 }
 `
 var PredicateTemplate = `
 // PredicateFunc defines data-type for validation function
 type PredicateFunc func(*$newobj) bool
-
 `

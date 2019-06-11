@@ -217,7 +217,7 @@ func copyStructFile(fs *ast.File, w *bufio.Writer) {
 			if b.Tok != token.TYPE {
 				break
 			}
-			_, err := fmt.Fprintf(w, "type %s struct {\n", b.Specs[0].(*ast.TypeSpec).Name.Name)
+			_, err := fmt.Fprintf(w, "\ntype %s struct {\n", b.Specs[0].(*ast.TypeSpec).Name.Name)
 			if err != nil {
 				log.Fatalf("Failed to write struct : %v", err)
 			}
