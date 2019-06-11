@@ -152,7 +152,7 @@ func parseTemplate(template string, fs *ast.File, w *bufio.Writer) error {
 			if b.Tok != token.TYPE {
 				break
 			}
-			objname = b.Specs[0].(*ast.TypeSpec).Name.Name
+			objname = strings.Title(b.Specs[0].(*ast.TypeSpec).Name.Name)
 		}
 		return true
 	})
@@ -176,15 +176,16 @@ func parseTemplate(template string, fs *ast.File, w *bufio.Writer) error {
 				ntype := fmt.Sprintf("%s", field.Type)
 				template = strings.Replace(template, "$iType", ntype, -1)
 				if predicateGenertor {
-					cond := ""
+					fcond := ""
 					switch ntype {
 					case "string":
-						cond = fmt.Sprintf("len(%s) == 0", field.Names[0].Name)
+						fcond = "len(%s.%s) == 0"
 					case "bool":
-						cond = fmt.Sprintf("%s == true", field.Names[0].Name)
+						fcond = "%s.%s == true"
 					case "int":
-						cond = fmt.Sprintf("%s == 0", field.Names[0].Name)
+						fcond = "%s.%s == 0"
 					}
+					cond := fmt.Sprintf(fcond, string(strings.ToLower(objname)[0]), field.Names[0].Name)
 					template = strings.Replace(template, "$cond", cond, -1)
 				}
 				_, err := w.WriteString(template)
@@ -217,7 +218,7 @@ func copyStructFile(fs *ast.File, w *bufio.Writer) {
 			if b.Tok != token.TYPE {
 				break
 			}
-			_, err := fmt.Fprintf(w, "\ntype %s struct {\n", b.Specs[0].(*ast.TypeSpec).Name.Name)
+			_, err := fmt.Fprintf(w, "\ntype %s struct {\n", strings.Title(b.Specs[0].(*ast.TypeSpec).Name.Name))
 			if err != nil {
 				log.Fatalf("Failed to write struct : %v", err)
 			}

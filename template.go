@@ -29,7 +29,7 @@ func ($obj *$newobj) Get$Var() $iType {
 var PredicateVarTemplate = `
 // IsSet$Var method check if the $Var field of $NewObj object is set.
 func Is$VarSet() PredicateFunc {
-	return func(c *$newobj) bool {
+	return func($obj *$newobj) bool {
 		return $cond
 	}
 }
