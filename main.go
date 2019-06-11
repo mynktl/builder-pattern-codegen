@@ -13,9 +13,18 @@ import (
 	"strings"
 )
 
-var builder = []string{BuildTemplate, BuildVarTemplate, ValidateTemplate, BuildFuncTemplate}
-var predicate = []string{PredicateTemplate, PredicateVarTemplate}
-var utils = []string{SetVarTemplate, GetVarTemplate}
+// Each template defines generic code block
+var builder = []string{pkgTemplate, BuildTemplate, BuildVarTemplate, ValidateTemplate, BuildFuncTemplate}
+var predicate = []string{pkgTemplate, PredicateTemplate, PredicateVarTemplate}
+var utils = []string{pkgTemplate, SetVarTemplate, GetVarTemplate}
+
+// if template is using structure's variable then add it here also
+var vartemplate = map[string]string{
+	BuildVarTemplate:     "",
+	PredicateVarTemplate: "",
+	SetVarTemplate:       "",
+	GetVarTemplate:       "",
+}
 
 const (
 	Builder = iota
@@ -135,12 +144,14 @@ func main() {
 
 func parseTemplate(template string, fs *ast.File, w *bufio.Writer) error {
 	var objname string
-	shouldParseVar := true
+	var pkgname string
+	shouldParseVar := false
 	predicateGenertor := false
 
-	if template == BuildTemplate || template == PredicateTemplate || template == BuildFuncTemplate || template == ValidateTemplate {
-		shouldParseVar = false
+	if _, ok := vartemplate[template]; ok {
+		shouldParseVar = true
 	}
+
 	if template == PredicateVarTemplate {
 		predicateGenertor = true
 	}
@@ -153,9 +164,16 @@ func parseTemplate(template string, fs *ast.File, w *bufio.Writer) error {
 				break
 			}
 			objname = b.Specs[0].(*ast.TypeSpec).Name.Name
+		case *ast.File:
+			pkgname = b.Name.Name
 		}
 		return true
 	})
+
+	if template == pkgTemplate {
+		template = strings.Replace(template, "$package", pkgname, -1)
+		goto exit
+	}
 
 	// copy strcture if it is builder template
 	if template == BuildTemplate {
@@ -197,12 +215,14 @@ func parseTemplate(template string, fs *ast.File, w *bufio.Writer) error {
 		return true
 	})
 
+exit:
 	if !shouldParseVar {
 		_, err := w.WriteString(template)
 		if err != nil {
 			log.Fatalf("Failed to write modified template : %v", err)
 		}
 	}
+
 	if err := w.Flush(); err != nil {
 		log.Fatalf("Failed to flush data to file : %v", err)
 	}

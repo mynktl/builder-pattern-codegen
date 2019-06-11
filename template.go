@@ -72,3 +72,6 @@ var BuilderFieldTemplate = `
 	// error
 	err error
 `
+var pkgTemplate = `
+package $package
+`
